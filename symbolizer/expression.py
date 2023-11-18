@@ -37,7 +37,16 @@ class UnaryExpression(Expression):
 class InputVariable(Expression):
     index: int
 
-    @cached_property
+    @property
+    def complexity(self) -> int:
+        return 1
+
+
+@dataclass
+class Constant(Expression):
+    index: int
+
+    @property
     def complexity(self) -> int:
         return 1
     
@@ -45,6 +54,8 @@ class InputVariable(Expression):
 def expression2str(expression: Expression) -> str:
     if isinstance(expression, InputVariable):
         return f"x{expression.index}"
+    if isinstance(expression, Constant):
+        return f"C{expression.index}"
     elif expression.operation == UnaryOperationType.NEGATE:
         return "-" + expression2str(expression.operand)
     elif expression.operation == UnaryOperationType.SQRT:
