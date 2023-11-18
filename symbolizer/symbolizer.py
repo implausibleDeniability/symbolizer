@@ -1,6 +1,7 @@
 import logging
 
 import numpy as np
+from tqdm import tqdm
 
 from symbolizer.operations import UnaryOperationType
 from symbolizer.operations import BinaryOperationType
@@ -27,7 +28,7 @@ class Symbolizer:
         """Given the set of pairs of variables and target variable
         gives approximate formula to compute y.
         """
-        for expression in self.expression_iterator:
+        for expression in tqdm(self.expression_iterator):
             error = self._compute_expression_error(expression)
             logging.debug(f"Expression: {expression2str(expression)}, mse: {error}")
             if error < self._tolerance:
