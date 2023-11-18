@@ -32,7 +32,7 @@ def _compute_binary_expression(expression, x):
 
 def _compute_unary_expression(expression, x):
     if expression.operation == UnaryOperationType.NEGATE:
-        return compute_expression(expression.operand, x)
+        return -compute_expression(expression.operand, x)
     elif expression.operation == UnaryOperationType.SQRT:
         return compute_expression(expression.operand, x) ** 0.5
     else:
