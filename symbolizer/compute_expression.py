@@ -34,7 +34,7 @@ def _compute_unary_expression(expression, x):
     if expression.operation == UnaryOperationType.NEGATE:
         return -compute_expression(expression.operand, x)
     elif expression.operation == UnaryOperationType.SQRT:
-        return compute_expression(expression.operand, x) ** 0.5
+        return np.sqrt(compute_expression(expression.operand, x))
     else:
         raise NotImplementedError()
 

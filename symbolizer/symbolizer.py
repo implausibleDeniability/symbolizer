@@ -15,11 +15,8 @@ from symbolizer.compute_expression import compute_expression
 
 
 class Symbolizer:
-    def __init__(self, x, y, max_complexity: int = 3, tolerance=1e-6):
-        self.expression_iterator = ExpressionIterator(
-            n_input_variables=x.shape[1],
-            max_complexity=max_complexity,
-        )
+    def __init__(self, x, y, max_complexity: int = 3, tolerance: float = 1e-6):
+        self.expression_iterator = ExpressionIterator(x, max_complexity, tolerance)
         self._tolerance = tolerance
         self.x = x
         self.y = y
@@ -30,7 +27,6 @@ class Symbolizer:
         """
         for expression in tqdm(self.expression_iterator):
             error = self._compute_expression_error(expression)
-            logging.debug(f"Expression: {expression2str(expression)}, mse: {error}")
             if error < self._tolerance:
                 return expression2str(expression)
 
