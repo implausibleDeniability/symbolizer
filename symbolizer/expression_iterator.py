@@ -22,14 +22,14 @@ class ExpressionIterator:
         self._constant_optimizer = constant_optimizer
 
         self.expressions = []
-        self.hashes = set()
+        self._hashes = set()
         self._init_atomic_expressions()
 
     def _init_atomic_expressions(self):
         for i in range(self._x.shape[1]):
             atomic_expression = InputVariable(index=i)
             self.expressions.append(atomic_expression)
-            self.hashes.add(self.expression_hasher.hash(atomic_expression))
+            self._hashes.add(self.expression_hasher.hash(atomic_expression))
         for i in range(self._constant_optimizer._n_constants):
             unknown_constant = Constant(i)
             self.expressions.append(unknown_constant)
@@ -37,18 +37,11 @@ class ExpressionIterator:
     def __iter__(self):
         for idx, expression in enumerate(self.expressions):
             for new_expression in self._complexify_expression(expression, n_first_for_binary=idx):
-                if new_expression.complexity > self._max_complexity: 
-                    logging.debug(f"Skipping expression {expression2str(new_expression)}: complexity {new_expression.complexity} is too large")
-                    continue
-                constants = self._constant_optimizer.optimize(new_expression)
-                if np.isnan(compute_expression(new_expression, self._x, constants)).any():
-                    logging.debug(f"Skipping expression {expression2str(new_expression)}: NaN")
-                    continue
-                if self.expression_hasher.hash(new_expression) in self.hashes:
-                    logging.debug(f"Skipping expression {expression2str(new_expression)}: hash exists")
-                    continue
+                if self._check_expression_is_too_complex(new_expression): continue
+                if self._check_expression_returns_nan(new_expression): continue
+                if self._check_expression_is_duplicate(new_expression): continue
                 self.expressions.append(new_expression)
-                self.hashes.add(self.expression_hasher.hash(new_expression))
+                self._hashes.add(self.expression_hasher.hash(new_expression))
                 logging.debug(f"New expression: {expression2str(new_expression)}, complexity={new_expression.complexity}")
                 yield new_expression
 
@@ -62,3 +55,22 @@ class ExpressionIterator:
                 yield BinaryExpression(operation, other_expression, expression)
                 if not operation.is_symmetric():
                     yield BinaryExpression(operation, expression, other_expression)
+
+    def _check_expression_is_too_complex(self, expression):
+        if expression.complexity > self._max_complexity: 
+            logging.debug(f"Skipping expression {expression2str(expression)}: complexity {expression.complexity} is too large")
+            return True
+        return False
+
+    def _check_expression_returns_nan(self, expression):
+        constants = self._constant_optimizer.optimize(expression)
+        if np.isnan(compute_expression(expression, self._x, constants)).any():
+            logging.debug(f"Skipping expression {expression2str(expression)}: NaN")
+            return True
+        return False
+
+    def _check_expression_is_duplicate(self, expression):
+        if self.expression_hasher.hash(expression) in self._hashes:
+            logging.debug(f"Skipping expression {expression2str(expression)}: hash exists")
+            return True
+        return False
