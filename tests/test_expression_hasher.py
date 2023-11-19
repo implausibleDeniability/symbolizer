@@ -5,6 +5,7 @@ from symbolizer.expression import InputVariable
 from symbolizer.expression import UnaryExpression
 from symbolizer.expression import BinaryExpression
 from symbolizer.expression_hasher import ExpressionHasher
+from symbolizer.constant_optimizer import ConstantOptimizer
 
 
 def test_expression_hasher_matches_double_negate():
@@ -18,6 +19,10 @@ def test_expression_hasher_matches_double_negate():
         )
     )
     x = np.random.randn(5, 2)
-    hasher = ExpressionHasher(x=x, tolerance=1e-6)
+    hasher = ExpressionHasher(
+        x=x, 
+        tolerance=1e-6, 
+        constant_optimizer=ConstantOptimizer(x=None, y=None, n_constants=0),
+    )
 
     assert hasher.hash(expression) == hasher.hash(double_negate_expression)

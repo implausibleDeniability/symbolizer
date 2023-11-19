@@ -6,6 +6,7 @@ from symbolizer.compute_expression import compute_expression
 from symbolizer.expression import InputVariable
 from symbolizer.expression import UnaryExpression
 from symbolizer.expression import BinaryExpression
+from symbolizer.expression import Constant
 from symbolizer.expression import expression2str
 from symbolizer.expression_hasher import ExpressionHasher
 from symbolizer.operations import UnaryOperationType
@@ -13,20 +14,25 @@ from symbolizer.operations import BinaryOperationType
 
 
 class ExpressionIterator:
-    def __init__(self, x, max_complexity: int = 3, tolerance=1e-6):
+    def __init__(self, x, y, constant_optimizer, max_complexity: int = 3, tolerance: float=1e-6):
         self._x = x
-        self._n_input_variables = x.shape[1]
+        self._y = y
         self._max_complexity = max_complexity
+        self.expression_hasher = ExpressionHasher(x, tolerance, constant_optimizer)
+        self._constant_optimizer = constant_optimizer
+
         self.expressions = []
-        self.expression_hasher = ExpressionHasher(x, tolerance)
         self.hashes = set()
         self._init_atomic_expressions()
 
     def _init_atomic_expressions(self):
-        for i in range(self._n_input_variables):
+        for i in range(self._x.shape[1]):
             atomic_expression = InputVariable(index=i)
             self.expressions.append(atomic_expression)
             self.hashes.add(self.expression_hasher.hash(atomic_expression))
+        for i in range(self._constant_optimizer._n_constants):
+            unknown_constant = Constant(i)
+            self.expressions.append(unknown_constant)
 
     def __iter__(self):
         for idx, expression in enumerate(self.expressions):
@@ -34,7 +40,8 @@ class ExpressionIterator:
                 if new_expression.complexity > self._max_complexity: 
                     logging.debug(f"Skipping expression {expression2str(new_expression)}: complexity {new_expression.complexity} is too large")
                     continue
-                if np.isnan(compute_expression(new_expression, self._x)).any():
+                constants = self._constant_optimizer.optimize(new_expression)
+                if np.isnan(compute_expression(new_expression, self._x, constants)).any():
                     logging.debug(f"Skipping expression {expression2str(new_expression)}: NaN")
                     continue
                 if self.expression_hasher.hash(new_expression) in self.hashes:
@@ -55,4 +62,3 @@ class ExpressionIterator:
                 yield BinaryExpression(operation, other_expression, expression)
                 if not operation.is_symmetric():
                     yield BinaryExpression(operation, expression, other_expression)
-

@@ -38,6 +38,10 @@ def _compute_unary_expression(expression, x, constants: np.ndarray):
         return -compute_expression(expression.operand, x, constants)
     elif expression.operation == UnaryOperationType.SQRT:
         return np.sqrt(compute_expression(expression.operand, x, constants))
+    elif expression.operation == UnaryOperationType.SQUARE:
+        return compute_expression(expression.operand, x, constants) ** 2
+    elif expression.operation == UnaryOperationType.EXP:
+        return np.exp(compute_expression(expression.operand, x, constants))
     else:
         raise NotImplementedError()
 
