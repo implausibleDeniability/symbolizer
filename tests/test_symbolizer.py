@@ -3,6 +3,9 @@ import pytest
 from scipy.stats import norm
 
 from symbolizer import Symbolizer
+from symbolizer.expression import *
+from symbolizer.operations import *
+from tests.utils import assert_expressions_equal_in_bounds
 
 
 def set_seed():
@@ -17,7 +20,7 @@ def test_sum_of_two_variables():
     symbolizer = Symbolizer(x, y, n_constants=0)
     expression = symbolizer.run()
 
-    assert expression == 'x0 + x1'
+    assert expression2str(expression) == 'x0 + x1'
 
 
 def test_product_of_two_variables():
@@ -28,7 +31,7 @@ def test_product_of_two_variables():
     symbolizer = Symbolizer(x, y, n_constants=0)
     expression = symbolizer.run()
 
-    assert expression == '(x0) * (x1)'
+    assert expression2str(expression) == '(x0) * (x1)'
 
 
 def test_division():
@@ -39,7 +42,7 @@ def test_division():
     symbolizer = Symbolizer(x, y, n_constants=0)
     expression = symbolizer.run()
 
-    assert expression == '(x0) / (x1)'
+    assert expression2str(expression) == '(x0) / (x1)'
 
 
 def test_three_variables():
@@ -50,7 +53,7 @@ def test_three_variables():
     symbolizer = Symbolizer(x, y, max_complexity=5)
     expression = symbolizer.run()
 
-    assert expression == '(x2) * (x0 + x1)'
+    assert expression2str(expression) == '(x2) * (x0 + x1)'
 
 
 def test_four_variables():
@@ -61,7 +64,7 @@ def test_four_variables():
     symbolizer = Symbolizer(x, y, max_complexity=10, n_constants=0)
     expression = symbolizer.run()
 
-    assert expression == '(x0 + (x1) * (x2)) / (x0 + x3)'
+    assert expression2str(expression) == '(x0 + (x1) * (x2)) / (x0 + x3)'
 
 
 def test_with_constant():
@@ -73,7 +76,15 @@ def test_with_constant():
     symbolizer = Symbolizer(x, y, max_complexity=10)
     expression = symbolizer.run()
 
-    assert expression == '(x0) * (7.2)'
+    assert_expressions_equal_in_bounds(
+        expression,
+        BinaryExpression(
+            operation=BinaryOperationType.MULT,
+            left_operand=KnownConstant(const),
+            right_operand=InputVariable(0),
+        ),
+        bounds=[(-10, 10)]
+    )
 
 
 @pytest.mark.skip(reason='not fixed yet')
@@ -85,4 +96,4 @@ def test_std_gaussian_pdf():
     symbolizer = Symbolizer(x, y, max_complexity=10, n_constants=2)
     expression = symbolizer.run()
 
-    assert expression == '(C0) / (sqrt(exp((x0)^2)))'
+    assert expression2str(expression) == '(C0) / (sqrt(exp((x0)^2)))'

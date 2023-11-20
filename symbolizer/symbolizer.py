@@ -24,7 +24,7 @@ class Symbolizer:
         self.x = x
         self.y = y
         
-    def run(self) -> str:
+    def run(self) -> Expression:
         """Given the set of pairs of variables and target variable
         gives approximate formula to compute y.
         """
@@ -32,4 +32,4 @@ class Symbolizer:
             error = compute_expression_error(expression, self.x, self.y)
             logging.debug(f"Trying expression {expression2str(expression)}. Error {error}")
             if error < self._tolerance:
-                return expression2str(expression)
+                return expression
