@@ -5,14 +5,14 @@ from symbolizer.operations import BinaryOperationType
 from symbolizer.operations import UnaryOperationType
 
 
-@dataclass
+@dataclass(frozen=True)
 class Expression:
     @cached_property
     def complexity(self) -> int:
         raise NotImplementedError()
 
 
-@dataclass
+@dataclass(frozen=True)
 class BinaryExpression(Expression):
     operation: BinaryOperationType
     left_operand: Expression
@@ -23,7 +23,7 @@ class BinaryExpression(Expression):
         return self.left_operand.complexity + self.right_operand.complexity + 1
 
 
-@dataclass
+@dataclass(frozen=True)
 class UnaryExpression(Expression):
     operation: UnaryOperationType
     operand: Expression
@@ -33,7 +33,7 @@ class UnaryExpression(Expression):
         return self.operand.complexity + 1
 
 
-@dataclass
+@dataclass(frozen=True)
 class InputVariable(Expression):
     index: int
 
@@ -42,9 +42,18 @@ class InputVariable(Expression):
         return 1
 
 
-@dataclass
-class Constant(Expression):
+@dataclass(frozen=True)
+class UnknownConstant(Expression):
     index: int
+
+    @property
+    def complexity(self) -> int:
+        return 1
+
+
+@dataclass(frozen=True)
+class KnownConstant(Expression):
+    value: float
 
     @property
     def complexity(self) -> int:
@@ -54,8 +63,10 @@ class Constant(Expression):
 def expression2str(expression: Expression) -> str:
     if isinstance(expression, InputVariable):
         return f"x{expression.index}"
-    if isinstance(expression, Constant):
+    elif isinstance(expression, UnknownConstant):
         return f"C{expression.index}"
+    elif isinstance(expression, KnownConstant):
+        return str(round(expression.value, 6))
     elif expression.operation == UnaryOperationType.NEGATE:
         return "-" + expression2str(expression.operand)
     elif expression.operation == UnaryOperationType.SQRT:

@@ -19,10 +19,6 @@ def test_expression_hasher_matches_double_negate():
         )
     )
     x = np.random.randn(5, 2)
-    hasher = ExpressionHasher(
-        x=x, 
-        tolerance=1e-6, 
-        constant_optimizer=ConstantOptimizer(x=None, y=None, n_constants=0),
-    )
+    hasher = ExpressionHasher(x=x, tolerance=1e-6)
 
     assert hasher.hash(expression) == hasher.hash(double_negate_expression)

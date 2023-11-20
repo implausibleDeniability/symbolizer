@@ -29,8 +29,7 @@ class Symbolizer:
         gives approximate formula to compute y.
         """
         for expression in tqdm(self._expression_iterator):
-            constants = self._constant_optimizer.optimize(expression)
-            logging.debug(f"For expression {expression2str(expression)} best found constants are {constants}")
-            error = compute_expression_error(expression, self.x, self.y, constants)
+            error = compute_expression_error(expression, self.x, self.y)
+            logging.debug(f"Trying expression {expression2str(expression)}. Error {error}")
             if error < self._tolerance:
                 return expression2str(expression)

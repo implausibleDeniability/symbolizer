@@ -6,13 +6,16 @@ from symbolizer.expression import Expression
 from symbolizer.expression import InputVariable
 from symbolizer.expression import UnaryExpression
 from symbolizer.expression import BinaryExpression
-from symbolizer.expression import Constant
+from symbolizer.expression import UnknownConstant
+from symbolizer.expression import KnownConstant
 
 
-def compute_expression(expression: Expression, x: np.ndarray, constants: np.ndarray) -> np.ndarray: 
+def compute_expression(expression: Expression, x: np.ndarray, constants: np.ndarray = None) -> np.ndarray: 
     if isinstance(expression, InputVariable):
         return x[:, expression.index]
-    if isinstance(expression, Constant):
+    if isinstance(expression, KnownConstant):
+        return expression.value * np.ones((x.shape[0]))
+    if isinstance(expression, UnknownConstant):
         return constants[expression.index] * np.ones((x.shape[0]))
     elif isinstance(expression, UnaryExpression):
         return _compute_unary_expression(expression, x, constants)
