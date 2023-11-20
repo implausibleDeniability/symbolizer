@@ -97,3 +97,19 @@ def test_std_gaussian_pdf():
     expression = symbolizer.run()
 
     assert expression2str(expression) == '(C0) / (sqrt(exp((x0)^2)))'
+
+
+@pytest.mark.skip(reason='not implemented yet')
+def test_non_std_gaussian_pdf():
+    set_seed()
+    MEAN = 2
+    STD = 3
+    x = np.random.randn(15, 1)
+    y = norm.pdf(x[:, 0], loc=MEAN, scale=STD)
+
+    symbolizer = Symbolizer(x, y, max_complexity=14, n_constants=3)
+    expression = symbolizer.run()
+
+    print(expression)
+    print(expression2str(expression))
+    assert expression2str(expression) == '(C0) / (sqrt(exp((x0)^2)))'
