@@ -35,6 +35,10 @@ def _compute_unary_expression(expression, x):
         return -compute_expression(expression.operand, x)
     elif expression.operation == UnaryOperationType.SQRT:
         return np.sqrt(compute_expression(expression.operand, x))
+    elif expression.operation == UnaryOperationType.SQUARE:
+        return compute_expression(expression.operand, x) ** 2
+    elif expression.operation == UnaryOperationType.EXP:
+        return np.exp(compute_expression(expression.operand, x))
     else:
-        raise NotImplementedError()
+        raise NotImplementedError(f"Unexpected operation {expression.operation}")
 
