@@ -15,6 +15,20 @@ def test_str2expression_simple_sum():
     assert actual_expression == expected_expression
 
 
+def test_str2expression_triple_sum():
+    actual_expression = str2expression('x0 + x1 + x0')
+    expected_expression = BinaryExpression(
+        BinaryOperationType.SUM,
+        BinaryExpression(
+            operation=BinaryOperationType.SUM,
+            left_operand=InputVariable(0),
+            right_operand=InputVariable(1),
+        ),
+        InputVariable(0),
+    )
+    assert actual_expression == expected_expression
+
+
 def test_str2expression_simple_diff():
     actual_expression = str2expression('x0 - x1')
     expected_expression = BinaryExpression(
