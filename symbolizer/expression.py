@@ -72,7 +72,7 @@ def expression2str(expression: Expression) -> str:
     elif expression.operation == UnaryOperationType.SQRT:
         return "sqrt(" + expression2str(expression.operand) + ")"
     elif expression.operation == UnaryOperationType.SQUARE:
-        return "(" + expression2str(expression.operand) + ")^2"
+        return "sqr(" + expression2str(expression.operand) + ")"
     elif expression.operation == UnaryOperationType.EXP:
         return "exp(" + expression2str(expression.operand) + ")"
     elif expression.operation == BinaryOperationType.SUM:
@@ -83,5 +83,3 @@ def expression2str(expression: Expression) -> str:
         return f"({expression2str(expression.left_operand)}) / ({expression2str(expression.right_operand)})"
     else:
         raise NotImplementedError()
-
-

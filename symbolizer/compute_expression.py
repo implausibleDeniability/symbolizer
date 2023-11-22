@@ -46,5 +46,4 @@ def _compute_unary_expression(expression, x, constants: np.ndarray):
     elif expression.operation == UnaryOperationType.EXP:
         return np.exp(compute_expression(expression.operand, x, constants))
     else:
-        raise NotImplementedError()
-
+        raise NotImplementedError(f"Unexpected operation {expression.operation}")
