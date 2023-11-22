@@ -64,31 +64,26 @@ class TokenParser:
                         operand=tokens.pop(i+1),
                     )
 
-    def _reduce_mults_divs(
-            self,
-            tokens: list[Expression | BinaryOperationType],
-        ) -> None:
-        for i, token in enumerate(tokens):
-            if (
-                i + 1 < len(tokens) 
-                and tokens[i + 1] in [BinaryOperationType.MULT, BinaryOperationType.DIV]
-            ):
-                assert isinstance(tokens[i], Expression), f"Expected Expression, found {tokens[i]}"
-                assert isinstance(tokens[i+2], Expression), f"Expected Expression, found {tokens[i+2]}"
-                tokens[i] = BinaryExpression(
-                    right_operand=tokens.pop(i + 2),
-                    operation=tokens.pop(i + 1), 
-                    left_operand=tokens[i],
-                )
+    def _reduce_mults_divs(self, tokens: list[Expression | BinaryOperationType]) -> None:
+        self._reduce_binary_operations_consecutively(tokens, [BinaryOperationType.MULT, BinaryOperationType.DIV])
 
-    def _reduce_sums(
-            self,
-            tokens: list[Expression | BinaryOperationType],
-        ) -> None:
-        for i, token in enumerate(tokens):
-            if i + 1 < len(tokens) and tokens[i + 1] == BinaryOperationType.SUM:
-                tokens[i] = BinaryExpression(
-                    right_operand=tokens.pop(i + 2),
-                    operation=tokens.pop(i + 1), 
-                    left_operand=tokens[i],
+    def _reduce_sums(self, tokens: list[Expression | BinaryOperationType]) -> None:
+        self._reduce_binary_operations_consecutively(tokens, [BinaryOperationType.SUM])
+
+    def _reduce_binary_operations_consecutively(
+        self,
+        tokens: list[Expression | BinaryOperationType],
+        operations: list[BinaryOperationType],
+    ) -> None:
+        i = 0
+        while i < len(tokens):
+            if tokens[i] in operations:
+                assert isinstance(tokens[i - 1], Expression), f"Expected Expression, found {tokens[i - 1]}"
+                assert isinstance(tokens[i + 1], Expression), f"Expected Expression, found {tokens[i + 1]}"
+                tokens[i - 1] = BinaryExpression(
+                    right_operand=tokens.pop(i + 1),
+                    operation=tokens.pop(i), 
+                    left_operand=tokens[i - 1],
                 )
+            else:
+                i += 1
