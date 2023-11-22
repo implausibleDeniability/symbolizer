@@ -49,6 +49,10 @@ def expression2str(expression: Expression) -> str:
         return "-" + expression2str(expression.operand)
     elif expression.operation == UnaryOperationType.SQRT:
         return "sqrt(" + expression2str(expression.operand) + ")"
+    elif expression.operation == UnaryOperationType.SQUARE:
+        return "sqr(" + expression2str(expression.operand) + ")"
+    elif expression.operation == UnaryOperationType.EXP:
+        return "sqr(" + expression2str(expression.operand) + ")"
     elif expression.operation == BinaryOperationType.SUM:
         return f"{expression2str(expression.left_operand)} + {expression2str(expression.right_operand)}"
     elif expression.operation == BinaryOperationType.MULT:
