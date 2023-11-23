@@ -3,6 +3,7 @@ import pytest
 from scipy.stats import norm
 
 from symbolizer import Symbolizer
+from symbolizer import str2expression
 from symbolizer.expression import *
 from symbolizer.operations import *
 from tests.utils import assert_expressions_equal_in_bounds
@@ -75,19 +76,16 @@ def test_with_constant():
 
     symbolizer = Symbolizer(x, y, max_complexity=10)
     expression = symbolizer.run()
+    expected_expression = str2expression('7.2 * x0')
 
     assert_expressions_equal_in_bounds(
         expression,
-        BinaryExpression(
-            operation=BinaryOperationType.MULT,
-            left_operand=KnownConstant(const),
-            right_operand=InputVariable(0),
-        ),
+        expected_expression,
         bounds=[(-10, 10)]
     )
 
 
-@pytest.mark.skip(reason='not fixed yet')
+@pytest.mark.slow()
 def test_std_gaussian_pdf():
     set_seed()
     x = np.random.randn(10, 1)
@@ -95,21 +93,8 @@ def test_std_gaussian_pdf():
 
     symbolizer = Symbolizer(x, y, max_complexity=10, n_constants=2)
     expression = symbolizer.run()
+    expected_expression = str2expression('1/sqrt(2 * 3.1415926) * exp(-sqr(x0)/2)')
 
-    assert expression2str(expression) == '(C0) / (sqrt(exp((x0)^2)))'
-
-
-@pytest.mark.skip(reason='not implemented yet')
-def test_non_std_gaussian_pdf():
-    set_seed()
-    MEAN = 2
-    STD = 3
-    x = np.random.randn(15, 1)
-    y = norm.pdf(x[:, 0], loc=MEAN, scale=STD)
-
-    symbolizer = Symbolizer(x, y, max_complexity=14, n_constants=3)
-    expression = symbolizer.run()
-
-    print(expression)
-    print(expression2str(expression))
-    assert expression2str(expression) == '(C0) / (sqrt(exp((x0)^2)))'
+    assert_expressions_equal_in_bounds(
+        expression, expected_expression, bounds=[(-10, 10)]
+    )
