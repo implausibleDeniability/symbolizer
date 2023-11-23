@@ -33,3 +33,4 @@ class Symbolizer:
             logging.debug(f"Trying expression {expression2str(expression)}. Error {error}")
             if error < self._tolerance:
                 return expression
+        raise StopIteration("No suitable expression found")

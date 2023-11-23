@@ -22,7 +22,7 @@ def compute_expression(expression: Expression, x: np.ndarray, constants: np.ndar
     elif isinstance(expression, BinaryExpression):
         return _compute_binary_expression(expression, x, constants)
     else:
-        raise NotImplementedError("I dunno how to compute this expression")
+        raise NotImplementedError(f"I dunno how to compute expression {expression}")
 
 
 def _compute_binary_expression(expression, x, constants: np.ndarray):
