@@ -9,6 +9,7 @@ from symbolizer.operations import UnaryOperationType
 ExpressionToken = Literal['(', ')'] | InputVariable | UnaryOperationType | BinaryOperationType 
 
 class StrTokenizer:
+    CONSTANT_PATTERN = r'|\d+\.?\d*' # https://stackoverflow.com/questions/12643009/regular-expression-for-floating-point-numbers
     POSSIBLE_TOKENS_PATTERN = (
         r'\('
         r'|\)'
@@ -21,6 +22,7 @@ class StrTokenizer:
         r'|sqrt'
         r'|exp'
         r'|sqr'
+        + CONSTANT_PATTERN
     )
 
     def tokenize(self, string: str) -> list[ExpressionToken]:
@@ -39,6 +41,10 @@ class StrTokenizer:
                 tokens.append(str_token)
             elif str_token.startswith('x'):
                 tokens.append(InputVariable(index=int(str_token[1:])))
+            elif str_token.startswith('C'):
+                tokens.append(UnknownConstant(index=int(str_token[1:])))
+            elif re.fullmatch(self.CONSTANT_PATTERN, str_token):
+                tokens.append(KnownConstant(float(str_token)))
             elif str_token == '+':
                 tokens.append(BinaryOperationType.SUM)
             elif str_token == '-':
