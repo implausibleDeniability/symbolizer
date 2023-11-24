@@ -56,9 +56,9 @@ class TokenParser:
             self, 
             tokens: list[Expression | UnaryOperationType | BinaryOperationType],
         ) -> None:
-        for i, token in enumerate(tokens):
+        for i, token in reversed(list(enumerate(tokens))):
             if type(token) == UnaryOperationType:
-                assert isinstance(tokens[i+1], Expression)
+                assert isinstance(tokens[i + 1], Expression), f"Exprected Expression, found {tokens[i + 1]}"
                 tokens[i] = UnaryExpression(
                         operation=token, 
                         operand=tokens.pop(i+1),

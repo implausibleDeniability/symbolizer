@@ -5,14 +5,14 @@ from symbolizer.operations import BinaryOperationType
 from symbolizer.operations import UnaryOperationType
 
 
-@dataclass
+@dataclass(frozen=True)
 class Expression:
     @cached_property
     def complexity(self) -> int:
         raise NotImplementedError()
 
 
-@dataclass
+@dataclass(frozen=True)
 class BinaryExpression(Expression):
     operation: BinaryOperationType
     left_operand: Expression
@@ -23,7 +23,7 @@ class BinaryExpression(Expression):
         return self.left_operand.complexity + self.right_operand.complexity + 1
 
 
-@dataclass
+@dataclass(frozen=True)
 class UnaryExpression(Expression):
     operation: UnaryOperationType
     operand: Expression
@@ -33,11 +33,29 @@ class UnaryExpression(Expression):
         return self.operand.complexity + 1
 
 
-@dataclass
+@dataclass(frozen=True)
 class InputVariable(Expression):
     index: int
 
-    @cached_property
+    @property
+    def complexity(self) -> int:
+        return 1
+
+
+@dataclass(frozen=True)
+class UnknownConstant(Expression):
+    index: int
+
+    @property
+    def complexity(self) -> int:
+        return 1
+
+
+@dataclass(frozen=True)
+class KnownConstant(Expression):
+    value: float
+
+    @property
     def complexity(self) -> int:
         return 1
     
@@ -45,6 +63,10 @@ class InputVariable(Expression):
 def expression2str(expression: Expression) -> str:
     if isinstance(expression, InputVariable):
         return f"x{expression.index}"
+    elif isinstance(expression, UnknownConstant):
+        return f"C{expression.index}"
+    elif isinstance(expression, KnownConstant):
+        return str(round(expression.value, 6))
     elif expression.operation == UnaryOperationType.NEGATE:
         return "-" + expression2str(expression.operand)
     elif expression.operation == UnaryOperationType.SQRT:
@@ -52,7 +74,7 @@ def expression2str(expression: Expression) -> str:
     elif expression.operation == UnaryOperationType.SQUARE:
         return "sqr(" + expression2str(expression.operand) + ")"
     elif expression.operation == UnaryOperationType.EXP:
-        return "sqr(" + expression2str(expression.operand) + ")"
+        return "exp(" + expression2str(expression.operand) + ")"
     elif expression.operation == BinaryOperationType.SUM:
         return f"{expression2str(expression.left_operand)} + {expression2str(expression.right_operand)}"
     elif expression.operation == BinaryOperationType.MULT:
@@ -61,5 +83,3 @@ def expression2str(expression: Expression) -> str:
         return f"({expression2str(expression.left_operand)}) / ({expression2str(expression.right_operand)})"
     else:
         raise NotImplementedError()
-
-
