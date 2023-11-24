@@ -3,9 +3,7 @@ import numpy as np
 from symbolizer.operations import UnaryOperationType
 from symbolizer.expression import InputVariable
 from symbolizer.expression import UnaryExpression
-from symbolizer.expression import BinaryExpression
-from symbolizer.expression_hasher import ExpressionHasher
-from symbolizer.constant_optimizer import ConstantOptimizer
+from symbolizer.expression_iterator.expression_hasher import ExpressionHasher
 
 
 def test_expression_hasher_matches_double_negate():

@@ -8,9 +8,10 @@ from symbolizer.expression import UnaryExpression
 from symbolizer.expression import BinaryExpression
 from symbolizer.expression import UnknownConstant
 from symbolizer.expression import expression2str
-from symbolizer.expression_hasher import ExpressionHasher
+from symbolizer.expression_iterator.expression_hasher import ExpressionHasher
 from symbolizer.operations import UnaryOperationType
 from symbolizer.operations import BinaryOperationType
+from symbolizer.expression_iterator.complexity_ordered_set import ComplexityOrderedSet
 
 
 class ExpressionIterator:
@@ -21,38 +22,40 @@ class ExpressionIterator:
         self.expression_hasher = ExpressionHasher(x, tolerance)
         self._constant_optimizer = constant_optimizer
 
-        self.expressions = []
+        self.expressions_processed = []
+        self.expressions_to_process = ComplexityOrderedSet()
         self._hashes = set()
         self._init_atomic_expressions()
 
     def _init_atomic_expressions(self):
         for i in range(self._x.shape[1]):
             atomic_expression = InputVariable(index=i)
-            self.expressions.append(atomic_expression)
-            self._hashes.add(self.expression_hasher.hash(atomic_expression))
+            self.expressions_to_process.add(atomic_expression)
         for i in range(self._constant_optimizer._n_constants):
             unknown_constant = UnknownConstant(i)
-            self.expressions.append(unknown_constant)
+            self.expressions_to_process.add(unknown_constant)
 
     def __iter__(self):
-        for idx, expression in enumerate(self.expressions):
-            for new_expression in self._complexify_expression(expression, n_first_for_binary=idx):
+        while len(self.expressions_to_process) > 0:
+            expression = self.expressions_to_process.pop_min()
+            optimized_expression = self._constant_optimizer.optimize(expression)
+            if self._check_expression_returns_nan(optimized_expression): continue
+            if self._check_expression_is_duplicate(optimized_expression): continue
+            self.expressions_processed.append(expression)
+            self._hashes.add(self.expression_hasher.hash(optimized_expression))
+            for new_expression in self._complexify_expression(expression):
                 if self._check_expression_is_too_complex(new_expression): continue
-                optimized_expression = self._constant_optimizer.optimize(new_expression)
-                if self._check_expression_returns_nan(optimized_expression): continue
-                if self._check_expression_is_duplicate(optimized_expression): continue
-                self.expressions.append(new_expression)
-                self._hashes.add(self.expression_hasher.hash(optimized_expression))
-                logging.debug(f"New expression: {expression2str(new_expression)}, complexity={new_expression.complexity}")
-                yield optimized_expression
+                self.expressions_to_process.add(new_expression)
+            logging.debug(f"New expression: {expression2str(expression)}, complexity={expression.complexity}")
+            yield optimized_expression
 
-    def _complexify_expression(self, expression, n_first_for_binary):
+    def _complexify_expression(self, expression):
         # try unary
         for operation in UnaryOperationType:
             yield UnaryExpression(operation, expression)
         # try binary
         for operation in BinaryOperationType:
-            for other_expression in self.expressions[:n_first_for_binary]:
+            for other_expression in self.expressions_processed:
                 yield BinaryExpression(operation, other_expression, expression)
                 if not operation.is_symmetric():
                     yield BinaryExpression(operation, expression, other_expression)
