@@ -67,7 +67,10 @@ class ExpressionIterator:
         return False
 
     def _check_expression_returns_nan(self, expression):
-        if np.isnan(compute_expression(expression, self._x)).any():
+        if (
+            np.isnan(compute_expression(expression, self._x)).any() 
+            or np.isinf(compute_expression(expression, self._x)).any()
+        ):
             logging.debug(f"Skipping expression {expression2str(expression)}: NaN")
             return True
         return False
