@@ -30,7 +30,7 @@ class Symbolizer:
         """
         for expression in tqdm(self._expression_iterator):
             error = compute_expression_error(expression, self.x, self.y)
-            logging.debug(f"Trying expression {expression2str(expression)}. Error {error}")
+            logging.info(f"Trying expression {expression2str(expression)}. Error {error}")
             if error < self._tolerance:
                 return expression
         raise StopIteration("No suitable expression found")

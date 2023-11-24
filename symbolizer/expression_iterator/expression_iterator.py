@@ -46,7 +46,7 @@ class ExpressionIterator:
             for new_expression in self._complexify_expression(expression):
                 if self._check_expression_is_too_complex(new_expression): continue
                 self.expressions_to_process.add(new_expression)
-            logging.debug(f"New expression: {expression2str(expression)}, complexity={expression.complexity}")
+            logging.info(f"New expression: {expression2str(expression)}, complexity={expression.complexity}")
             yield optimized_expression
 
     def _complexify_expression(self, expression):
